@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const signInSchema = z.object({
@@ -23,22 +23,15 @@ type SignInFormData = z.infer<typeof signInSchema>;
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { data: session } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
   
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     mode: "onChange"
   });
 
-  useEffect(() => {
-    const message = searchParams.get('message');
-    if (message) {
-      setSuccessMessage(message);
-    }
-  }, [searchParams]);
+
 
   useEffect(() => {
     if (session) {
@@ -98,12 +91,6 @@ export default function SignIn() {
           </CardHeader>
           
           <CardContent>
-            {successMessage && (
-              <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-md">
-                <p className="text-green-400 text-sm">{successMessage}</p>
-              </div>
-            )}
-
             {error && (
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-md">
                 <p className="text-red-400 text-sm">{error}</p>
@@ -162,7 +149,7 @@ export default function SignIn() {
             
             <div className="mt-6 text-center">
               <p className="text-gray-400">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link 
                   href="/auth/signup" 
                   className="text-green-400 hover:text-green-300 font-medium transition-colors"
