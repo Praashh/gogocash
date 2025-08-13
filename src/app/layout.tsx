@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Analytics } from '@vercel/analytics/next';
+import { SessionProviders } from "../../providers";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
@@ -30,7 +32,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SessionProviders>
+          {children}
+        </SessionProviders>
+        <Toaster />
         <Analytics />
       </body>
     </html>
