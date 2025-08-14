@@ -70,19 +70,35 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-      <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500 rounded-full mb-4">
-            <div className="w-6 h-6 bg-green-300 rounded-full"></div>
-          </div>
-          <h1 className="text-2xl font-bold text-white">GoGoCash</h1>
-        </div>
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-[#031416] to-black" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_400px_at_center,rgba(45,212,191,0.15),transparent_60%)]" />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          backgroundPosition: "center",
+        }}
+      />
 
-        <Card className="bg-gray-800 border-gray-700 shadow-2xl">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 w-full">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div
+              className="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-teal-400 text-teal-400 font-bold mb-4"
+              aria-label="GoGoCash logo"
+            >
+              G
+            </div>
+            <h1 className="text-2xl font-bold">GoGoCash</h1>
+          </div>
+        <div className="relative">
+          <div className="pointer-events-none absolute -inset-4 rounded-[36px] bg-[radial-gradient(420px_200px_at_center,rgba(45,212,191,0.18),transparent_70%)] blur-2xl" />
+          <Card className="relative rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,14,0.88),rgba(8,17,17,0.76))] backdrop-blur shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_40px_80px_-20px_rgba(0,0,0,0.6)]">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-white">
+            <CardTitle className="text-2xl font-bold text-white tracking-tight">
               Welcome Back
             </CardTitle>
             <CardDescription className="text-gray-400">
@@ -104,12 +120,13 @@ export default function SignIn() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Email</FormLabel>
+                      <FormLabel className="text-gray-300">Email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="Enter your email"
-                          className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500"
+                          autoComplete="email"
+                          className="h-12 rounded-full bg-white/5 border-white/10 text-white placeholder:text-gray-400 px-5 focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                           {...field}
                         />
                       </FormControl>
@@ -123,12 +140,13 @@ export default function SignIn() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Password</FormLabel>
+                      <FormLabel className="text-gray-300">Password</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
                           placeholder="Enter your password"
-                          className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-green-500"
+                          autoComplete="current-password"
+                          className="h-12 rounded-full bg-white/5 border-white/10 text-white placeholder:text-gray-400 px-5 focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                           {...field}
                         />
                       </FormControl>
@@ -139,7 +157,7 @@ export default function SignIn() {
                 
                 <Button
                   type="submit"
-                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 text-black font-semibold py-3 shadow-[0_12px_30px_rgba(45,212,191,0.45)] hover:from-teal-300 hover:to-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || !form.formState.isValid}
                 >
                   {isLoading ? "Signing In..." : "Sign In"}
@@ -152,14 +170,16 @@ export default function SignIn() {
                 Don&apos;t have an account?{" "}
                 <Link 
                   href="/auth/signup" 
-                  className="text-green-400 hover:text-green-300 font-medium transition-colors"
+                  className="text-teal-400 hover:text-teal-300 font-medium transition-colors"
                 >
                   Sign up
                 </Link>
               </p>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
+        </div>
       </div>
     </div>
   );

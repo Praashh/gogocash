@@ -9,14 +9,16 @@ export async function middleware(request: NextRequest) {
   });
 
   // console.log("===> token", token);
-
+  const requestPath = request.nextUrl.pathname;
   const protectedRoutes = ['/dashboard', '/profile', '/settings']; 
-
-  if (protectedRoutes.includes(request.nextUrl.pathname) && !token) {
+  
+  if((requestPath === "/" || requestPath === "/auth/signin") && token){
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+  if (protectedRoutes.includes(requestPath) && !token) {
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }
-
-  return NextResponse.next(); 
+  return NextResponse.next();
 }
 
 export const config = {
