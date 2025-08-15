@@ -21,11 +21,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-
-
+import Image from "next/image";
 import { getAllData } from "@/actions/shopeextra/getAll";
 import { TProductData } from "../../../zod/involve-asia";
-
 
 type SortKey =
   | "relevance"
@@ -33,8 +31,6 @@ type SortKey =
   | "price-asc"
   | "price-desc"
   | "commission-desc";
-
-
 
 export default function Page() {
   const [query, setQuery] = React.useState("");
@@ -47,21 +43,23 @@ export default function Page() {
   const [inStock, setInStock] = React.useState<boolean>(false);
   const [prime, setPrime] = React.useState<boolean>(false);
   const [sort, setSort] = React.useState<SortKey>("relevance");
-  const [products, setProducts] = React.useState<TProductData[]>([])
+  const [products, setProducts] = React.useState<TProductData[]>([]);
 
   // Extract unique values for filters
   const categories = React.useMemo(() => {
-    const uniqueCategories = Array.from(new Set(products.map(p => p.shop_type)));
+    const uniqueCategories = Array.from(
+      new Set(products.map((p) => p.shop_type)),
+    );
     return ["All", ...uniqueCategories];
   }, [products]);
 
   const sellers = React.useMemo(() => {
-    const uniqueSellers = Array.from(new Set(products.map(p => p.shop_name)));
+    const uniqueSellers = Array.from(new Set(products.map((p) => p.shop_name)));
     return ["All", ...uniqueSellers];
   }, [products]);
 
   const countries = React.useMemo(() => {
-    const uniqueCountries = Array.from(new Set(products.map(p => p.country)));
+    const uniqueCountries = Array.from(new Set(products.map((p) => p.country)));
     return ["All", ...uniqueCountries];
   }, [products]);
 
@@ -69,37 +67,66 @@ export default function Page() {
 
   // Sort and filter products
   const sorted = React.useMemo(() => {
-    const filtered = products.filter(p => {
+    const filtered = products.filter((p) => {
       if (category !== "All" && p.shop_type !== category) return false;
       if (seller !== "All" && p.shop_name !== seller) return false;
       if (country !== "All" && p.country !== country) return false;
-      if (minPrice && parseFloat(p.commission_rate) < parseFloat(minPrice)) return false;
-      if (maxPrice && parseFloat(p.commission_rate) > parseFloat(maxPrice)) return false;
-      if (minCommission && parseFloat(p.commission_rate) < parseFloat(minCommission)) return false;
+      if (minPrice && parseFloat(p.commission_rate) < parseFloat(minPrice))
+        return false;
+      if (maxPrice && parseFloat(p.commission_rate) > parseFloat(maxPrice))
+        return false;
+      if (
+        minCommission &&
+        parseFloat(p.commission_rate) < parseFloat(minCommission)
+      )
+        return false;
       return true;
     });
 
     switch (sort) {
       case "price-asc":
-        return filtered.sort((a, b) => parseFloat(a.commission_rate) - parseFloat(b.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(a.commission_rate) - parseFloat(b.commission_rate),
+        );
       case "price-desc":
-        return filtered.sort((a, b) => parseFloat(b.commission_rate) - parseFloat(a.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
       case "commission-desc":
-        return filtered.sort((a, b) => parseFloat(b.commission_rate) - parseFloat(a.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
       default:
         return filtered;
     }
-  }, [products, category, seller, country, minPrice, maxPrice, minCommission, sort]);
+  }, [
+    products,
+    category,
+    seller,
+    country,
+    minPrice,
+    maxPrice,
+    minCommission,
+    sort,
+  ]);
 
-  useEffect(()=>{
-    (async()=>{
-      const response = await getAllData()
+  useEffect(() => {
+    (async () => {
+      const response = await getAllData();
       console.log("resposne", response);
-      if (response && 'data' in response && response.data && 'data' in response.data) {
-        setProducts(response.data.data)
+      if (
+        response &&
+        "data" in response &&
+        response.data &&
+        "data" in response.data
+      ) {
+        setProducts(response.data.data);
       }
-  })()
-  }, [])
+    })();
+  }, []);
 
   const Filters = (
     <div className="space-y-4">
@@ -276,14 +303,15 @@ export default function Page() {
           <main>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sorted.map((p) => {
-                const isHigh = parseFloat(p.commission_rate) >= highCommissionThreshold;
+                const isHigh =
+                  parseFloat(p.commission_rate) >= highCommissionThreshold;
                 return (
                   <Card
                     key={p.shop_id}
                     className="bg-background/10 backdrop-blur border-white/10 overflow-hidden"
                   >
                     <div className="relative aspect-[4/3] bg-white/5">
-                      <img
+                      <Image
                         src={p.shop_image}
                         alt={p.offer_name}
                         className="h-full w-full object-cover"
@@ -304,12 +332,14 @@ export default function Page() {
                       <div className="mt-3 flex items-center gap-2">
                         {isHigh && (
                           <Badge className="bg-teal-500 text-black">
-                            {Math.round(parseFloat(p.commission_rate) * 100)}% commission
+                            {Math.round(parseFloat(p.commission_rate) * 100)}%
+                            commission
                           </Badge>
                         )}
                         {!isHigh && (
                           <Badge variant="secondary" className="text-white/90">
-                            {Math.round(parseFloat(p.commission_rate) * 100)}% commission
+                            {Math.round(parseFloat(p.commission_rate) * 100)}%
+                            commission
                           </Badge>
                         )}
                       </div>

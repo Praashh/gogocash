@@ -16,11 +16,16 @@ export const productDataSchema = z.object({
 });
 
 export const productDataResponseSchema = z.object({
-    status: z.string(),
-    message: z.string(),
-    data: z.object({page: z.number(), limit: z.number(), count: z.number(), nextPage: z.number(), data: z.array(productDataSchema)}),
-})
-
+  status: z.string(),
+  message: z.string(),
+  data: z.object({
+    page: z.number(),
+    limit: z.number(),
+    count: z.number(),
+    nextPage: z.number(),
+    data: z.array(productDataSchema),
+  }),
+});
 
 export type TProductData = z.infer<typeof productDataSchema>;
 export type TProductDataResponse = z.infer<typeof productDataResponseSchema>;
