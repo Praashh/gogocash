@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
 
 export default function SignOut() {
@@ -11,17 +17,16 @@ export default function SignOut() {
 
   const handleSignOut = async () => {
     setIsLoading(true);
-    
+
     try {
       console.log("Signing out...");
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // await signOut();
-      
+
       setIsSignedOut(true);
       console.log("Signout successful!");
-      
     } catch (error) {
       console.error("Signout failed:", error);
     } finally {
@@ -44,8 +49,18 @@ export default function SignOut() {
           <Card className="bg-gray-800 border-gray-700 shadow-2xl">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <CardTitle className="text-2xl font-bold text-white">
@@ -55,21 +70,24 @@ export default function SignOut() {
                 You have been signed out of your account
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="text-center">
               <p className="text-gray-400 mb-6">
                 Thank you for using GoGoCash. Come back soon!
               </p>
-              
+
               <div className="space-y-3">
                 <Link href="/auth/signin">
                   <Button className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3">
                     Sign In Again
                   </Button>
                 </Link>
-                
+
                 <Link href="/">
-                  <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white font-semibold py-3">
+                  <Button
+                    variant="outline"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white font-semibold py-3"
+                  >
                     Go to Home
                   </Button>
                 </Link>
@@ -95,8 +113,18 @@ export default function SignOut() {
         <Card className="bg-gray-800 border-gray-700 shadow-2xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
             </div>
             <CardTitle className="text-2xl font-bold text-white">
@@ -106,12 +134,12 @@ export default function SignOut() {
               Are you sure you want to sign out?
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="text-center">
             <p className="text-gray-400 mb-6">
               You will need to sign in again to access your account
             </p>
-            
+
             <div className="space-y-3">
               <Button
                 onClick={handleSignOut}
@@ -120,9 +148,12 @@ export default function SignOut() {
               >
                 {isLoading ? "Signing Out..." : "Yes, Sign Out"}
               </Button>
-              
+
               <Link href="/">
-                <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white font-semibold py-3">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white font-semibold py-3"
+                >
                   Cancel
                 </Button>
               </Link>

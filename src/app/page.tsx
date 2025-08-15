@@ -16,8 +16,8 @@ export default function PricingPage() {
         }}
       />
       <div className="relative z-10">
-        <Header/>
-        <Hero/>
+        <Header />
+        <Hero />
       </div>
     </div>
   );
