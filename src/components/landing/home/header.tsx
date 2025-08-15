@@ -1,6 +1,10 @@
+"use client"
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { navLinks } from "@/../data/nav-links";
 export default function Header() {
+  const pathname = usePathname();
     return (
         <header className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center space-x-3">
@@ -9,20 +13,12 @@ export default function Header() {
           </div>
           <span className="text-xl font-semibold">GoGoCash</span>
         </div>
-
         <nav className="flex items-center space-x-8">
-          <Link href="#" className="hover:text-teal-400 transition-colors">
-            Products
-          </Link>
-          <Link href="#" className="hover:text-teal-400 transition-colors">
-            Use Cases
-          </Link>
-          <Link href="#" className="hover:text-teal-400 transition-colors">
-            Blog
-          </Link>
-          <Link href="#" className="hover:text-teal-400 transition-colors">
-            About Us
-          </Link>
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className={`hover:text-teal-400 transition-colors ${pathname === link.href ? "text-teal-400" : ""}`}>
+              {link.label}
+            </Link>
+          ))}
         </nav>
       <Link href = "/auth/signin">
         <Button className="rounded-full bg-teal-400 px-4 py-2 text-sm text-black hover:bg-teal-300">
