@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -35,7 +35,8 @@ export default function NotFound() {
           404
         </h1>
         <p className="mt-4 max-w-xl text-balance text-white/80">
-          The page you’re looking for doesn’t exist or was moved. Let’s get you back on track.
+          The page you’re looking for doesn’t exist or was moved. Let’s get you
+          back on track.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -56,7 +57,7 @@ export default function NotFound() {
             style={{
               left: `${(i * 53) % 100}%`,
               top: `${(i * 37) % 100}%`,
-              animation: `twinkle ${(6 + (i % 5))}s ease-in-out ${(i % 3) * 0.7}s infinite`,
+              animation: `twinkle ${6 + (i % 5)}s ease-in-out ${(i % 3) * 0.7}s infinite`,
             }}
           />
         ))}
@@ -64,19 +65,37 @@ export default function NotFound() {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-20px) translateX(10px); }
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+          }
         }
         @keyframes hueshift {
-          0% { filter: hue-rotate(0deg); }
-          50% { filter: hue-rotate(20deg); }
-          100% { filter: hue-rotate(0deg); }
+          0% {
+            filter: hue-rotate(0deg);
+          }
+          50% {
+            filter: hue-rotate(20deg);
+          }
+          100% {
+            filter: hue-rotate(0deg);
+          }
         }
         @keyframes twinkle {
-          0%, 100% { opacity: 0.15; transform: scale(1); }
-          50% { opacity: 0.9; transform: scale(1.6); }
+          0%,
+          100% {
+            opacity: 0.15;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.6);
+          }
         }
       `}</style>
     </div>
-  )
+  );
 }
