@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,123 +21,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Star } from "lucide-react";
 import Image from "next/image";
-
-type Product = {
-  id: string;
-  title: string;
-  price: number;
-  currency: string;
-  rating: number;
-  reviews: number;
-  sellerType: "Brand" | "Retailer" | "Marketplace" | "Reseller";
-  country: string;
-  commissionRate: number;
-  prime: boolean;
-  inStock: boolean;
-  category: string;
-  image: string;
-};
-
-const products: Product[] = [
-  {
-    id: "1",
-    title: "Noise-Canceling Headphones with Long Battery Life",
-    price: 199.99,
-    currency: "USD",
-    rating: 4.6,
-    reviews: 1423,
-    sellerType: "Brand",
-    country: "US",
-    commissionRate: 0.25,
-    prime: true,
-    inStock: true,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1518442072849-5e30d89848b8?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Ergonomic Office Chair with Lumbar Support",
-    price: 289,
-    currency: "USD",
-    rating: 4.2,
-    reviews: 893,
-    sellerType: "Retailer",
-    country: "CA",
-    commissionRate: 0.12,
-    prime: false,
-    inStock: true,
-    category: "Home & Office",
-    image:
-      "https://images.unsplash.com/photo-1580480055273-228ff5388ef5?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    title: '4K Monitor 27" with HDR and USB-C',
-    price: 349.49,
-    currency: "USD",
-    rating: 4.4,
-    reviews: 512,
-    sellerType: "Marketplace",
-    country: "US",
-    commissionRate: 0.18,
-    prime: true,
-    inStock: true,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "4",
-    title: "Gaming Mouse with Programmable Buttons",
-    price: 59.99,
-    currency: "EUR",
-    rating: 4.1,
-    reviews: 221,
-    sellerType: "Brand",
-    country: "DE",
-    commissionRate: 0.3,
-    prime: false,
-    inStock: true,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "5",
-    title: 'Standing Desk Adjustable Height 48"',
-    price: 499,
-    currency: "GBP",
-    rating: 4.7,
-    reviews: 312,
-    sellerType: "Reseller",
-    country: "UK",
-    commissionRate: 0.22,
-    prime: true,
-    inStock: false,
-    category: "Home & Office",
-    image:
-      "https://images.unsplash.com/photo-1516387938699-a93567ec168e?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "6",
-    title: "Portable Bluetooth Speaker Waterproof",
-    price: 79.99,
-    currency: "USD",
-    rating: 4.3,
-    reviews: 1031,
-    sellerType: "Brand",
-    country: "US",
-    commissionRate: 0.15,
-    prime: true,
-    inStock: true,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1490376840453-5f616fbebe5b?q=80&w=1200&auto=format&fit=crop",
-  },
-];
+import { getAllData } from "@/actions/shopeextra/getAll";
+import { TProductData } from "../../../zod/involve-asia";
 
 type SortKey =
   | "relevance"
@@ -145,48 +31,6 @@ type SortKey =
   | "price-asc"
   | "price-desc"
   | "commission-desc";
-
-function formatMoney(amount: number, currency: string) {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-    }).format(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${currency}`;
-  }
-}
-
-function Stars({ value }: { value: number }) {
-  const full = Math.floor(value);
-  const empty = 5 - full - (value % 1 >= 0.5 ? 1 : 0);
-  const hasHalf = value % 1 >= 0.5;
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: full }).map((_, i) => (
-        <Star
-          key={`f-${i}`}
-          className="h-4 w-4 fill-yellow-400 text-yellow-400"
-        />
-      ))}
-      {hasHalf && (
-        <div className="relative h-4 w-4">
-          <Star className="absolute inset-0 h-4 w-4 text-yellow-400" />
-          <div
-            className="absolute inset-0 overflow-hidden"
-            style={{ width: "50%" }}
-          >
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          </div>
-          <div className="absolute inset-0 opacity-30" />
-        </div>
-      )}
-      {Array.from({ length: empty }).map((_, i) => (
-        <Star key={`e-${i}`} className="h-4 w-4 text-yellow-400/30" />
-      ))}
-    </div>
-  );
-}
 
 export default function Page() {
   const [query, setQuery] = React.useState("");
@@ -199,69 +43,90 @@ export default function Page() {
   const [inStock, setInStock] = React.useState<boolean>(false);
   const [prime, setPrime] = React.useState<boolean>(false);
   const [sort, setSort] = React.useState<SortKey>("relevance");
+  const [products, setProducts] = React.useState<TProductData[]>([]);
 
-  const categories = React.useMemo(
-    () => ["All", ...Array.from(new Set(products.map((p) => p.category)))],
-    [],
-  );
-  const sellers = React.useMemo(
-    () => ["All", ...Array.from(new Set(products.map((p) => p.sellerType)))],
-    [],
-  );
-  const countries = React.useMemo(
-    () => ["All", ...Array.from(new Set(products.map((p) => p.country)))],
-    [],
-  );
+  // Extract unique values for filters
+  const categories = React.useMemo(() => {
+    const uniqueCategories = Array.from(
+      new Set(products.map((p) => p.shop_type)),
+    );
+    return ["All", ...uniqueCategories];
+  }, [products]);
 
-  const filtered = React.useMemo(() => {
-    return products
-      .filter((p) =>
-        query ? p.title.toLowerCase().includes(query.toLowerCase()) : true,
+  const sellers = React.useMemo(() => {
+    const uniqueSellers = Array.from(new Set(products.map((p) => p.shop_name)));
+    return ["All", ...uniqueSellers];
+  }, [products]);
+
+  const countries = React.useMemo(() => {
+    const uniqueCountries = Array.from(new Set(products.map((p) => p.country)));
+    return ["All", ...uniqueCountries];
+  }, [products]);
+
+  const highCommissionThreshold = 0.1; // 10% commission threshold
+
+  // Sort and filter products
+  const sorted = React.useMemo(() => {
+    const filtered = products.filter((p) => {
+      if (category !== "All" && p.shop_type !== category) return false;
+      if (seller !== "All" && p.shop_name !== seller) return false;
+      if (country !== "All" && p.country !== country) return false;
+      if (minPrice && parseFloat(p.commission_rate) < parseFloat(minPrice))
+        return false;
+      if (maxPrice && parseFloat(p.commission_rate) > parseFloat(maxPrice))
+        return false;
+      if (
+        minCommission &&
+        parseFloat(p.commission_rate) < parseFloat(minCommission)
       )
-      .filter((p) => (category !== "All" ? p.category === category : true))
-      .filter((p) => (seller !== "All" ? p.sellerType === seller : true))
-      .filter((p) => (country !== "All" ? p.country === country : true))
-      .filter((p) => (minPrice ? p.price >= Number(minPrice) : true))
-      .filter((p) => (maxPrice ? p.price <= Number(maxPrice) : true))
-      .filter((p) =>
-        minCommission ? p.commissionRate * 100 >= Number(minCommission) : true,
-      )
-      .filter((p) => (inStock ? p.inStock : true))
-      .filter((p) => (prime ? p.prime : true));
+        return false;
+      return true;
+    });
+
+    switch (sort) {
+      case "price-asc":
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(a.commission_rate) - parseFloat(b.commission_rate),
+        );
+      case "price-desc":
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
+      case "commission-desc":
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
+      default:
+        return filtered;
+    }
   }, [
-    query,
+    products,
     category,
     seller,
     country,
     minPrice,
     maxPrice,
     minCommission,
-    inStock,
-    prime,
+    sort,
   ]);
 
-  const sorted = React.useMemo(() => {
-    const copy = [...filtered];
-    switch (sort) {
-      case "price-asc":
-        copy.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        copy.sort((a, b) => b.price - a.price);
-        break;
-      case "commission-desc":
-        copy.sort((a, b) => b.commissionRate - a.commissionRate);
-        break;
-      case "best":
-        copy.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        break;
-    }
-    return copy;
-  }, [filtered, sort]);
-
-  const highCommissionThreshold = 0.2;
+  useEffect(() => {
+    (async () => {
+      const response = await getAllData();
+      console.log("resposne", response);
+      if (
+        response &&
+        "data" in response &&
+        response.data &&
+        "data" in response.data
+      ) {
+        setProducts(response.data.data);
+      }
+    })();
+  }, []);
 
   const Filters = (
     <div className="space-y-4">
@@ -438,57 +303,44 @@ export default function Page() {
           <main>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sorted.map((p) => {
-                const isHigh = p.commissionRate >= highCommissionThreshold;
+                const isHigh =
+                  parseFloat(p.commission_rate) >= highCommissionThreshold;
                 return (
                   <Card
-                    key={p.id}
+                    key={p.shop_id}
                     className="bg-background/10 backdrop-blur border-white/10 overflow-hidden"
                   >
                     <div className="relative aspect-[4/3] bg-white/5">
                       <Image
-                        src={p.image}
-                        alt={p.title}
+                        src={p.shop_image}
+                        alt={p.offer_name}
                         className="h-full w-full object-cover"
                       />
-                      {p.prime && (
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-blue-500 text-black">
-                            Fast shipping
-                          </Badge>
-                        </div>
-                      )}
                     </div>
                     <CardHeader className="p-4 pb-2">
                       <CardTitle className="text-base text-white line-clamp-2 min-h-[2.75rem]">
-                        {p.title}
+                        {p.offer_name}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 pt-0">
-                      <div className="flex items-center gap-2">
-                        <Stars value={p.rating} />
-                        <span className="text-xs text-white/60">
-                          ({p.reviews.toLocaleString()})
-                        </span>
-                      </div>
                       <div className="mt-2 text-lg font-semibold">
-                        {formatMoney(p.price, p.currency)}
+                        {p.shop_name}
                       </div>
                       <div className="mt-1 text-sm text-white/70">
-                        {p.sellerType} • {p.country}
+                        {p.shop_type} • {p.country}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         {isHigh && (
                           <Badge className="bg-teal-500 text-black">
-                            {Math.round(p.commissionRate * 100)}% commission
+                            {Math.round(parseFloat(p.commission_rate) * 100)}%
+                            commission
                           </Badge>
                         )}
                         {!isHigh && (
                           <Badge variant="secondary" className="text-white/90">
-                            {Math.round(p.commissionRate * 100)}% commission
+                            {Math.round(parseFloat(p.commission_rate) * 100)}%
+                            commission
                           </Badge>
-                        )}
-                        {!p.inStock && (
-                          <Badge className="bg-red-500">Out of stock</Badge>
                         )}
                       </div>
                       <div className="mt-4 flex gap-2">
