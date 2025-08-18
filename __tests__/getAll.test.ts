@@ -1,14 +1,45 @@
 import { describe, it, expect, beforeEach, vi, afterAll } from "vitest";
 import { getAllData } from "../src/actions/shopeextra/getAll";
-import axios from "axios";
+import { SecureHttpClient } from "@/lib/http-client";
+import { redis } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 import { productDataResponseSchema } from "@/../zod/involve-asia";
 
-vi.mock("axios");
-const mockedAxios = vi.mocked(axios, true);
+vi.mock("@/lib/http-client");
+vi.mock("@/lib/redis");
+vi.mock("@/lib/logger");
+vi.mock("@/lib/config", () => ({
+  API_CONFIG: {
+    SHOPEEXTRA: {
+      BASE_URL: "https://api.example.com",
+      PRODUCTS_ENDPOINT: "/shopeextra/all",
+    },
+  },
+  CACHE_CONFIG: {
+    TTL: {
+      PRODUCTS: 3600,
+    },
+    PREFIXES: {
+      PRODUCTS: "products:page:",
+    },
+  },
+  HTTP_CONFIG: {
+    TIMEOUT: 10000,
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 1000,
+  },
+}));
+
+const mockedSecureHttpClient = vi.mocked(SecureHttpClient);
+const mockedRedis = vi.mocked(redis);
+const mockedLogger = vi.mocked(logger);
 
 const originalEnv = process.env;
 
 describe("getAllData", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockClient: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
     process.env = {
@@ -16,6 +47,13 @@ describe("getAllData", () => {
       NEXT_PUBLIC_SHOPEEXTRA_PREFIX: "https://api.example.com",
       INVOLVE_ASIA_API_TOKEN: "test-token",
     };
+
+    // Setup mock client
+    mockClient = {
+      setAuthToken: vi.fn(),
+      post: vi.fn(),
+    };
+    mockedSecureHttpClient.mockImplementation(() => mockClient);
   });
 
   afterAll(() => {
@@ -50,50 +88,61 @@ describe("getAllData", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValueOnce({ data: mockApiResponse });
+    mockClient.post.mockResolvedValueOnce({
+      success: true,
+      data: mockApiResponse,
+    });
 
-    const result = await getAllData();
+    mockedRedis.set.mockResolvedValueOnce("OK");
 
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      "https://api.example.com/all",
-      null,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer test-token",
-        },
+    const result = await getAllData(1, "test-token");
+
+    expect(mockedSecureHttpClient).toHaveBeenCalledWith({
+      baseURL: "https://api.example.com",
+      timeout: 10000,
+      retry: {
+        maxAttempts: 3,
+        delay: 1000,
+        backoffMultiplier: 2,
       },
-    );
+    });
+
+    expect(mockClient.setAuthToken).toHaveBeenCalledWith("test-token");
+    expect(mockClient.post).toHaveBeenCalledWith("/shopeextra/all", null);
 
     expect(result).toEqual({
       status: "success",
       message: "Data fetched successfully",
-      data: mockApiResponse.data,
+      data: mockApiResponse.data.data,
     });
+
+    expect(mockedRedis.set).toHaveBeenCalledWith(
+      "products:page:1",
+      JSON.stringify(mockApiResponse.data.data),
+      "EX",
+      3600,
+    );
   });
 
-  it("should return failed response when API call throws an error", async () => {
-    const mockError = new Error("Network error");
-    mockedAxios.post.mockRejectedValueOnce(mockError);
+  it("should return failed response when API call fails", async () => {
+    mockClient.post.mockResolvedValueOnce({
+      success: false,
+      error: "Network error",
+      statusCode: 500,
+    });
 
-    const result = await getAllData();
-
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      "https://api.example.com/all",
-      null,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer test-token",
-        },
-      },
-    );
+    const result = await getAllData(1, "test-token");
 
     expect(result).toEqual({
       status: "failed",
-      message: "Failed to fetch data",
+      message: "Network error",
       data: [],
     });
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      "HTTP request failed for page 1",
+      { page: 1, error: "Network error", statusCode: 500 },
+    );
   });
 
   it("should return failed response when API returns invalid data structure", async () => {
@@ -106,9 +155,12 @@ describe("getAllData", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValueOnce({ data: invalidApiResponse });
+    mockClient.post.mockResolvedValueOnce({
+      success: true,
+      data: invalidApiResponse,
+    });
 
-    const result = await getAllData();
+    const result = await getAllData(1, "test-token");
 
     expect(result).toEqual({
       status: "failed",
@@ -117,30 +169,21 @@ describe("getAllData", () => {
     });
   });
 
-  it("should handle axios errors with different error types", async () => {
-    const testCases = [
-      { error: new Error("Network timeout"), description: "network timeout" },
-      {
-        error: { response: { status: 401, data: "Unauthorized" } },
-        description: "401 unauthorized",
-      },
-      {
-        error: { response: { status: 500, data: "Internal server error" } },
-        description: "500 server error",
-      },
-    ];
+  it("should handle exceptions and return failed response", async () => {
+    const mockError = new Error("Network timeout");
+    mockClient.post.mockRejectedValueOnce(mockError);
 
-    for (const testCase of testCases) {
-      mockedAxios.post.mockRejectedValueOnce(testCase.error);
+    const result = await getAllData(1, "test-token");
 
-      const result = await getAllData();
+    expect(result).toEqual({
+      status: "failed",
+      message: "Failed to fetch data",
+      data: [],
+    });
 
-      expect(result).toEqual({
-        status: "failed",
-        message: "Failed to fetch data",
-        data: [],
-      });
-    }
+    expect(mockedLogger.error).toHaveBeenCalledWith("ERROR: Network timeout", {
+      page: 1,
+    });
   });
 
   it("should validate response data against zod schema", async () => {
@@ -156,9 +199,14 @@ describe("getAllData", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValueOnce({ data: validApiResponse });
+    mockClient.post.mockResolvedValueOnce({
+      success: true,
+      data: validApiResponse,
+    });
 
-    const result = await getAllData();
+    mockedRedis.set.mockResolvedValueOnce("OK");
+
+    const result = await getAllData(1, "test-token");
 
     expect(result.status).toBe("success");
     expect(result.data).toBeDefined();
@@ -181,14 +229,51 @@ describe("getAllData", () => {
       },
     };
 
-    mockedAxios.post.mockResolvedValueOnce({ data: emptyDataResponse });
+    mockClient.post.mockResolvedValueOnce({
+      success: true,
+      data: emptyDataResponse,
+    });
 
-    const result = await getAllData();
+    mockedRedis.set.mockResolvedValueOnce("OK");
+
+    const result = await getAllData(1, "test-token");
 
     expect(result).toEqual({
       status: "success",
       message: "Data fetched successfully",
-      data: emptyDataResponse.data,
+      data: [],
     });
+  });
+
+  it("should handle non-array product data", async () => {
+    const invalidDataResponse = {
+      status: "success",
+      message: "Data retrieved successfully",
+      data: {
+        page: 1,
+        limit: 10,
+        count: 1,
+        nextPage: 0,
+        data: "not an array", // Invalid: should be array
+      },
+    };
+
+    mockClient.post.mockResolvedValueOnce({
+      success: true,
+      data: invalidDataResponse,
+    });
+
+    const result = await getAllData(1, "test-token");
+
+    expect(result).toEqual({
+      status: "failed",
+      message: "Failed to fetch data",
+      data: [],
+    });
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining("ERROR:"),
+      { page: 1 },
+    );
   });
 });

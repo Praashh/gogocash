@@ -21,8 +21,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import Image from "next/image";
-import { getAllData } from "@/actions/shopeextra/getAll";
 import { TProductData } from "../../../zod/involve-asia";
 
 type SortKey =
@@ -44,8 +53,10 @@ export default function Page() {
   const [prime, setPrime] = React.useState<boolean>(false);
   const [sort, setSort] = React.useState<SortKey>("relevance");
   const [products, setProducts] = React.useState<TProductData[]>([]);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const itemsPerPage = 12;
 
-  // Extract unique values for filters
   const categories = React.useMemo(() => {
     const uniqueCategories = Array.from(
       new Set(products.map((p) => p.shop_type)),
@@ -65,7 +76,6 @@ export default function Page() {
 
   const highCommissionThreshold = 0.1; // 10% commission threshold
 
-  // Sort and filter products
   const sorted = React.useMemo(() => {
     const filtered = products.filter((p) => {
       if (category !== "All" && p.shop_type !== category) return false;
@@ -113,20 +123,56 @@ export default function Page() {
     sort,
   ]);
 
+  const totalPages = Math.ceil(sorted.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProducts = sorted.slice(startIndex, endIndex);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [category, seller, country, minPrice, maxPrice, minCommission, sort]);
+
   useEffect(() => {
     (async () => {
-      const response = await getAllData();
-      console.log("resposne", response);
-      if (
-        response &&
-        "data" in response &&
-        response.data &&
-        "data" in response.data
-      ) {
-        setProducts(response.data.data);
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/shopeextra/all?page=1");
+        const data = await response.json();
+
+        if (data.success) {
+          setProducts(data.productData);
+          console.log(`Data loaded from ${data.source}`);
+        } else {
+          console.error("Failed to fetch data:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, []);
+
+  const SkeletonCard = () => (
+    <Card className="bg-background/10 backdrop-blur border-white/10 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-white/5">
+        <Skeleton className="h-full w-full rounded-none" />
+      </div>
+      <CardHeader className="p-4 pb-2">
+        <Skeleton className="h-5 w-full mb-2" />
+        <Skeleton className="h-4 w-3/4" />
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-3">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-20 rounded-full" />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Skeleton className="h-9 flex-1" />
+          <Skeleton className="h-9 w-16" />
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   const Filters = (
     <div className="space-y-4">
@@ -302,61 +348,156 @@ export default function Page() {
           </aside>
           <main>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sorted.map((p) => {
-                const isHigh =
-                  parseFloat(p.commission_rate) >= highCommissionThreshold;
-                return (
-                  <Card
-                    key={p.shop_id}
-                    className="bg-background/10 backdrop-blur border-white/10 overflow-hidden"
-                  >
-                    <div className="relative aspect-[4/3] bg-white/5">
-                      <Image
-                        src={p.shop_image}
-                        alt={p.offer_name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <CardHeader className="p-4 pb-2">
-                      <CardTitle className="text-base text-white line-clamp-2 min-h-[2.75rem]">
-                        {p.offer_name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <div className="mt-2 text-lg font-semibold">
-                        {p.shop_name}
-                      </div>
-                      <div className="mt-1 text-sm text-white/70">
-                        {p.shop_type} • {p.country}
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        {isHigh && (
-                          <Badge className="bg-teal-500 text-black">
-                            {Math.round(parseFloat(p.commission_rate) * 100)}%
-                            commission
-                          </Badge>
-                        )}
-                        {!isHigh && (
-                          <Badge variant="secondary" className="text-white/90">
-                            {Math.round(parseFloat(p.commission_rate) * 100)}%
-                            commission
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="mt-4 flex gap-2">
-                        <Button className="flex-1">View</Button>
-                        <Button variant="secondary">Add</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-              {sorted.length === 0 && (
+              {isLoading
+                ? Array.from({ length: itemsPerPage }).map((_, index) => (
+                    <SkeletonCard key={index} />
+                  ))
+                : paginatedProducts.map((p) => {
+                    const isHigh =
+                      parseFloat(p.commission_rate) >= highCommissionThreshold;
+                    return (
+                      <Card
+                        key={p.shop_id}
+                        className="bg-background/10 backdrop-blur border-white/10 overflow-hidden"
+                      >
+                        <div className="relative aspect-[4/3] bg-white/5">
+                          <Image
+                            src={p.shop_image}
+                            alt={p.offer_name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <CardHeader className="p-4 pb-2">
+                          <CardTitle className="text-base text-white line-clamp-2 min-h-[2.75rem]">
+                            {p.offer_name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                          <div className="mt-2 text-lg font-semibold">
+                            {p.shop_name}
+                          </div>
+                          <div className="mt-1 text-sm text-white/70">
+                            {p.shop_type} • {p.country}
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            {isHigh && (
+                              <Badge className="bg-teal-500 text-black">
+                                {Math.round(
+                                  parseFloat(p.commission_rate) * 100,
+                                )}
+                                % commission
+                              </Badge>
+                            )}
+                            {!isHigh && (
+                              <Badge
+                                variant="secondary"
+                                className="text-white/90"
+                              >
+                                {Math.round(
+                                  parseFloat(p.commission_rate) * 100,
+                                )}
+                                % commission
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="mt-4 flex gap-2">
+                            <Button className="flex-1">View</Button>
+                            <Button variant="secondary">Add</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              {!isLoading && paginatedProducts.length === 0 && (
                 <div className="col-span-full text-white/70">
                   No products match your filters.
                 </div>
               )}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) {
+                            setCurrentPage(currentPage - 1);
+                          }
+                        }}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => {
+                        const shouldShow =
+                          page === 1 ||
+                          page === totalPages ||
+                          Math.abs(page - currentPage) <= 1;
+
+                        if (!shouldShow) {
+                          // Show ellipsis if there's a gap
+                          const prevPage = page - 1;
+                          if (
+                            prevPage === 1 ||
+                            Math.abs(prevPage - currentPage) <= 1
+                          ) {
+                            return (
+                              <PaginationItem key={`ellipsis-${page}`}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(page);
+                              }}
+                              isActive={currentPage === page}
+                              className="text-white hover:text-white"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      },
+                    )}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) {
+                            setCurrentPage(currentPage + 1);
+                          }
+                        }}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </main>
         </div>
       </div>
