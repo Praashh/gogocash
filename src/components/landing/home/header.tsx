@@ -12,13 +12,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
   const pathname = usePathname();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const { data: session } = useSession();
 
   const handleNavLinkClick = () => {
     setIsSheetOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut({
+      callbackUrl: "/auth/signin", // Redirect to sign-in page after sign-out
+    });
+    handleNavLinkClick();
   };
 
   return (
@@ -46,11 +55,20 @@ export default function Header() {
         ))}
       </nav>
       <div className="hidden md:block">
-        <Link href="/auth/signin">
-          <Button className="rounded-full bg-teal-400 px-4 py-2 text-sm text-black hover:bg-teal-300 transition-colors">
-            Get Started
+        {session?.user ? (
+          <Button
+            onClick={handleSignOut}
+            className="rounded-full bg-teal-400 px-4 py-2 text-sm text-black hover:bg-teal-300 transition-colors"
+          >
+            Sign Out
           </Button>
-        </Link>
+        ) : (
+          <Link href="/auth/signin">
+            <Button className="rounded-full bg-teal-400 px-4 py-2 text-sm text-black hover:bg-teal-300 transition-colors">
+              Get Started
+            </Button>
+          </Link>
+        )}
       </div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
@@ -95,11 +113,20 @@ export default function Header() {
             </nav>
 
             <div className="mt-8 pt-6 border-t border-white/10">
-              <Link href="/auth/signin" onClick={handleNavLinkClick}>
-                <Button className="w-full rounded-full bg-teal-400 px-6 py-3 text-black hover:bg-teal-300 transition-colors font-medium">
-                  Get Started
+              {session?.user ? (
+                <Button
+                  onClick={handleSignOut}
+                  className="w-full rounded-full bg-teal-400 px-6 py-3 text-black hover:bg-teal-300 transition-colors font-medium"
+                >
+                  Sign Out
                 </Button>
-              </Link>
+              ) : (
+                <Link href="/auth/signin" onClick={handleNavLinkClick}>
+                  <Button className="w-full rounded-full bg-teal-400 px-6 py-3 text-black hover:bg-teal-300 transition-colors font-medium">
+                    Get Started
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </SheetContent>
