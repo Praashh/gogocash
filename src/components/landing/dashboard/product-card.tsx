@@ -21,8 +21,9 @@ export const ProductCard = ({
   const isHigh = parseFloat(product.commission_rate) >= 0.1;
   const primaryCandidate = product.shop_image?.trim()?.length
     ? product.shop_image
-    : (product.shop_banner?.[0] || "");
-  const useFallback = !primaryCandidate || imageErrorById[product.shop_id] === true;
+    : product.shop_banner?.[0] || "";
+  const useFallback =
+    !primaryCandidate || imageErrorById[product.shop_id] === true;
   const imageSrc = useFallback ? getFallbackImage(index) : primaryCandidate;
 
   return (

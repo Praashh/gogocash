@@ -2,8 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,13 +31,18 @@ type SortKey =
   | "price-desc"
   | "commission-desc";
 
-  
-export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: TProductData[], isLoading: boolean }) => {
+export const ProductFeed = ({
+  initialProducts,
+  isLoading,
+}: {
+  initialProducts: TProductData[];
+  isLoading: boolean;
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   // console.log("dsefdsf", isLoading)
-  
+
   const [searchValue, setSearchValue] = useState<string>("");
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const [category, setCategory] = useState<string>("All");
@@ -38,7 +55,9 @@ export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: T
   const [prime, setPrime] = useState<boolean>(false);
   const [sort, setSort] = useState<SortKey>("relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [imageErrorById, setImageErrorById] = useState<Record<number, boolean>>({});
+  const [imageErrorById, setImageErrorById] = useState<Record<number, boolean>>(
+    {},
+  );
   const itemsPerPage = 12;
 
   // Debounce search input (300ms delay)
@@ -93,7 +112,8 @@ export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: T
     if (inStock) params.set("inStock", String(inStock));
     if (prime) params.set("prime", String(prime));
     if (sort && sort !== "relevance") params.set("sort", sort);
-    if (currentPage && currentPage !== 1) params.set("page", String(currentPage));
+    if (currentPage && currentPage !== 1)
+      params.set("page", String(currentPage));
 
     const search = params.toString();
     const href = search ? `${pathname}?${search}` : pathname;
@@ -116,17 +136,23 @@ export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: T
 
   // Memoized filter options
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(initialProducts.map((p) => p.shop_type)));
+    const uniqueCategories = Array.from(
+      new Set(initialProducts.map((p) => p.shop_type)),
+    );
     return ["All", ...uniqueCategories];
   }, [initialProducts]);
 
   const sellers = useMemo(() => {
-    const uniqueSellers = Array.from(new Set(initialProducts.map((p) => p.shop_name)));
+    const uniqueSellers = Array.from(
+      new Set(initialProducts.map((p) => p.shop_name)),
+    );
     return ["All", ...uniqueSellers];
   }, [initialProducts]);
 
   const countries = useMemo(() => {
-    const uniqueCountries = Array.from(new Set(initialProducts.map((p) => p.country)));
+    const uniqueCountries = Array.from(
+      new Set(initialProducts.map((p) => p.country)),
+    );
     return ["All", ...uniqueCountries];
   }, [initialProducts]);
 
@@ -136,29 +162,45 @@ export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: T
       // Search query filter (matches against multiple fields)
       if (debouncedQuery) {
         const searchQuery = debouncedQuery.toLowerCase();
-        const productText = `${p.shop_name} ${p.offer_name} ${p.shop_type} ${p.country}`.toLowerCase();
+        const productText =
+          `${p.shop_name} ${p.offer_name} ${p.shop_type} ${p.country}`.toLowerCase();
         if (!productText.includes(searchQuery)) return false;
       }
-      
+
       // Other filters
       if (category !== "All" && p.shop_type !== category) return false;
       if (seller !== "All" && p.shop_name !== seller) return false;
       if (country !== "All" && p.country !== country) return false;
-      if (minPrice && parseFloat(p.commission_rate) < parseFloat(minPrice)) return false;
-      if (maxPrice && parseFloat(p.commission_rate) > parseFloat(maxPrice)) return false;
-      if (minCommission && parseFloat(p.commission_rate) < parseFloat(minCommission)) return false;
-      
+      if (minPrice && parseFloat(p.commission_rate) < parseFloat(minPrice))
+        return false;
+      if (maxPrice && parseFloat(p.commission_rate) > parseFloat(maxPrice))
+        return false;
+      if (
+        minCommission &&
+        parseFloat(p.commission_rate) < parseFloat(minCommission)
+      )
+        return false;
+
       return true;
     });
 
     // Sorting logic
     switch (sort) {
       case "price-asc":
-        return filtered.sort((a, b) => parseFloat(a.commission_rate) - parseFloat(b.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(a.commission_rate) - parseFloat(b.commission_rate),
+        );
       case "price-desc":
-        return filtered.sort((a, b) => parseFloat(b.commission_rate) - parseFloat(a.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
       case "commission-desc":
-        return filtered.sort((a, b) => parseFloat(b.commission_rate) - parseFloat(a.commission_rate));
+        return filtered.sort(
+          (a, b) =>
+            parseFloat(b.commission_rate) - parseFloat(a.commission_rate),
+        );
       default:
         return filtered;
     }
@@ -171,8 +213,8 @@ export const ProductFeed = ({ initialProducts, isLoading }: { initialProducts: T
     minPrice,
     maxPrice,
     minCommission,
-    inStock,
-    prime,
+    // inStock,
+    // prime,
     sort,
   ]);
 

@@ -143,7 +143,11 @@ describe("GET /api/shopeextra/all", () => {
     const body = await (res as Response).json();
 
     expect(res.status).toBe(200);
-    expect(body).toEqual({ success: true, productData: apiData, source: "api" });
+    expect(body).toEqual({
+      success: true,
+      productData: apiData,
+      source: "api",
+    });
 
     expect(getAuthToken).not.toHaveBeenCalled();
     expect(getAllData).toHaveBeenCalledWith(page, token);
@@ -197,7 +201,11 @@ describe("GET /api/shopeextra/all", () => {
     const body = await (res as Response).json();
 
     expect(res.status).toBe(200);
-    expect(body).toEqual({ success: true, productData: apiData, source: "api" });
+    expect(body).toEqual({
+      success: true,
+      productData: apiData,
+      source: "api",
+    });
 
     expect(getAuthToken).toHaveBeenCalled();
     expect(getAllData).toHaveBeenCalledWith(page, newToken);
@@ -232,5 +240,3 @@ describe("GET /api/shopeextra/all", () => {
     });
   });
 });
-
-

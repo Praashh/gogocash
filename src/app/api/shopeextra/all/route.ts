@@ -2,18 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { redis } from "@/lib/redis";
 import { getAllData } from "@/actions/shopeextra/getAll";
 import { getAuthToken } from "@/actions/shopeextra/getToken";
-import {getServerSession} from "next-auth"
+import { getServerSession } from "next-auth";
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession();
 
-  if(!session?.user){
-    return NextResponse.json({
-      success: false,
-      productData: [],
-      error: "UnAuthenticated Request",
-      source: "api",
-    }, {status: 401});
+  if (!session?.user) {
+    return NextResponse.json(
+      {
+        success: false,
+        productData: [],
+        error: "UnAuthenticated Request",
+        source: "api",
+      },
+      { status: 401 },
+    );
   }
 
   const { searchParams } = request.nextUrl;
