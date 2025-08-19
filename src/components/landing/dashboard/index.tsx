@@ -23,6 +23,7 @@ import { TProductData } from "../../../../zod/involve-asia";
 import { Filters } from "./filters";
 import { ProductGrid } from "./product-grid";
 import { CustomPagination } from "./pagination";
+import { useResponsive } from "@/hooks/useResponsive";
 
 type SortKey =
   | "relevance"
@@ -41,7 +42,7 @@ export const ProductFeed = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  // console.log("dsefdsf", isLoading)
+  const { isMobile, isTablet } = useResponsive();
 
   const [searchValue, setSearchValue] = useState<string>("");
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
@@ -58,7 +59,8 @@ export const ProductFeed = ({
   const [imageErrorById, setImageErrorById] = useState<Record<number, boolean>>(
     {},
   );
-  const itemsPerPage = 12;
+
+  const itemsPerPage = isMobile ? 8 : isTablet ? 9 : 12;
 
   // Debounce search input (300ms delay)
   useEffect(() => {
@@ -213,8 +215,6 @@ export const ProductFeed = ({
     minPrice,
     maxPrice,
     minCommission,
-    // inStock,
-    // prime,
     sort,
   ]);
 
@@ -254,75 +254,84 @@ export const ProductFeed = ({
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-[#031416] to-black" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_300px_at_center_top,rgba(45,212,191,0.20),transparent_60%)]" />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold">Product Feed</h1>
-          <div className="flex items-center gap-2">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-0">
+            Product Feed
+          </h1>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Input
               placeholder="Search products..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="w-56 bg-transparent text-white border-white/20"
+              className="w-full sm:w-56 bg-transparent text-white border-white/20"
             />
-            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-48 bg-transparent text-white border-white/20">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent className="bg-black text-white border-white/20">
-                <SelectItem value="relevance">Relevance</SelectItem>
-                <SelectItem value="best">Best sellers</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                <SelectItem value="commission-desc">
-                  Commission: High to Low
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="sm:hidden">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="secondary">Filters</Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="w-80 bg-black text-white border-white/20"
-                >
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    <Filters
-                      categories={categories}
-                      sellers={sellers}
-                      countries={countries}
-                      searchValue={searchValue}
-                      category={category}
-                      seller={seller}
-                      country={country}
-                      minPrice={minPrice}
-                      maxPrice={maxPrice}
-                      minCommission={minCommission}
-                      inStock={inStock}
-                      prime={prime}
-                      onSearchChange={setSearchValue}
-                      onCategoryChange={setCategory}
-                      onSellerChange={setSeller}
-                      onCountryChange={setCountry}
-                      onMinPriceChange={setMinPrice}
-                      onMaxPriceChange={setMaxPrice}
-                      onMinCommissionChange={setMinCommission}
-                      onInStockChange={setInStock}
-                      onPrimeChange={setPrime}
-                      onResetFilters={handleResetFilters}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
+            <div className="flex gap-2">
+              <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+                <SelectTrigger className="w-full sm:w-48 bg-transparent text-white border-white/20">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-black text-white border-white/20">
+                  <SelectItem value="relevance">Relevance</SelectItem>
+                  <SelectItem value="best">Best sellers</SelectItem>
+                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                  <SelectItem value="commission-desc">
+                    Commission: High to Low
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="sm:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size={isMobile ? "sm" : "default"}
+                    >
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-80 bg-black text-white border-white/20"
+                  >
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      <Filters
+                        categories={categories}
+                        sellers={sellers}
+                        countries={countries}
+                        searchValue={searchValue}
+                        category={category}
+                        seller={seller}
+                        country={country}
+                        minPrice={minPrice}
+                        maxPrice={maxPrice}
+                        minCommission={minCommission}
+                        inStock={inStock}
+                        prime={prime}
+                        onSearchChange={setSearchValue}
+                        onCategoryChange={setCategory}
+                        onSellerChange={setSeller}
+                        onCountryChange={setCountry}
+                        onMinPriceChange={setMinPrice}
+                        onMaxPriceChange={setMaxPrice}
+                        onMinCommissionChange={setMinCommission}
+                        onInStockChange={setInStock}
+                        onPrimeChange={setPrime}
+                        onResetFilters={handleResetFilters}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-4 sm:gap-6">
           <aside className="hidden sm:block">
             <Card className="bg-background/10 backdrop-blur border-white/10 p-4">
               <Filters
@@ -361,7 +370,7 @@ export const ProductFeed = ({
             />
 
             {totalPages > 1 && (
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <CustomPagination
                   currentPage={currentPage}
                   totalPages={totalPages}

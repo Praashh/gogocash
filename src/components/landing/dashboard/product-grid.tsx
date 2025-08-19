@@ -1,6 +1,7 @@
 import { TProductData } from "../../../../zod/involve-asia";
 import { ProductCard } from "./product-card";
 import { SkeletonCard } from "./product-card-skeleton";
+import { useResponsive } from "@/hooks/useResponsive";
 
 type ProductGridProps = {
   products: TProductData[];
@@ -17,10 +18,13 @@ export const ProductGrid = ({
   imageErrorById,
   onImageError,
 }: ProductGridProps) => {
-  console.log(isLoading);
+  const { isMobile, isTablet } = useResponsive();
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        className={`grid grid-cols-1 ${isMobile ? "" : isTablet ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"} gap-4`}
+      >
         {Array.from({ length: itemsPerPage }).map((_, index) => (
           <SkeletonCard key={index} />
         ))}
@@ -37,7 +41,9 @@ export const ProductGrid = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div
+      className={`grid grid-cols-1 ${isMobile ? "" : isTablet ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"} gap-4`}
+    >
       {products.map((product, index) => (
         <ProductCard
           key={product.shop_id}

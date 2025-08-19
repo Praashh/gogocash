@@ -24,6 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup environment variables
+        run: |
+          echo "NEXT_PUBLIC_SHOPEEXTRA_PREFIX=https://dummy-api.example.com" >> $GITHUB_ENV
+          echo "SHOPEEXTRA_API_KEY=dummy_key" >> $GITHUB_ENV
+          echo "SHOPEEXTRA_API_SECRET=dummy_secret" >> $GITHUB_ENV
+          echo "NODE_ENV=test" >> $GITHUB_ENV
+
       - name: Run ESLint
         run: npm run lint
 
