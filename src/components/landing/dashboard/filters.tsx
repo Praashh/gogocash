@@ -147,19 +147,21 @@ export const Filters = ({
         <Checkbox
           id="stock"
           checked={inStock}
+          className="border-white/50"
           onCheckedChange={(v) => onInStockChange(Boolean(v))}
         />
-        <label htmlFor="stock" className="text-sm text-white/80">
+        <label htmlFor="stock" className="text-sm text-white">
           In stock
         </label>
       </div>
       <div className="flex items-center gap-2">
         <Checkbox
           id="prime"
+          className="border-white/50"
           checked={prime}
           onCheckedChange={(v) => onPrimeChange(Boolean(v))}
         />
-        <label htmlFor="prime" className="text-sm text-white/80">
+        <label htmlFor="prime" className="text-sm text-white">
           Fast shipping
         </label>
       </div>

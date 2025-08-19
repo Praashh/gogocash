@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TProductData } from "../../../../zod/involve-asia";
 import { getFallbackImage } from "../../../../data/images";
+import { AddToCartButton } from "./add-to-cart-button";
 
 type ProductCardProps = {
   product: TProductData;
@@ -73,7 +74,7 @@ export const ProductCard = ({
               View
             </a>
           </Button>
-          <Button variant="secondary">Add</Button>
+          <AddToCartButton product={product} />
         </div>
       </CardContent>
     </Card>
