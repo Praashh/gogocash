@@ -8,51 +8,66 @@ const redisConfig = {
   db: 0,
 };
 
-export const redis = new Redis(redisConfig);
+export class RedisSingleton {
+  private static instance: Redis;
 
-redis.on("error", (error) => {
-  console.error("Redis connection error:", error);
-});
+  private constructor() {} // block "new RedisSingleton()"
 
-redis.on("connect", () => {
-  console.log("Redis connected successfully");
-});
+  public static getInstance(): Redis {
+    if (!RedisSingleton.instance) {
+      RedisSingleton.instance = new Redis(redisConfig);
 
-redis.on("ready", () => {
-  console.log("Redis is ready to accept commands");
-});
+      // Events
+      RedisSingleton.instance.on("error", (error) => {
+        console.error("Redis connection error:", error);
+      });
 
-redis.on("close", () => {
-  console.log("Redis connection closed");
-});
+      RedisSingleton.instance.on("connect", () => {
+        console.log("Redis connected successfully");
+      });
 
-process.on("SIGINT", async () => {
-  console.log("Shutting down Redis connection...");
-  await redis.quit();
-  process.exit(0);
-});
+      RedisSingleton.instance.on("ready", () => {
+        console.log("Redis is ready to accept commands");
+      });
 
-process.on("SIGTERM", async () => {
-  console.log("Shutting down Redis connection...");
-  await redis.quit();
-  process.exit(0);
-});
+      RedisSingleton.instance.on("close", () => {
+        console.log("Redis connection closed");
+      });
 
-export const isRedisConnected = (): boolean => {
-  return redis.status === "ready";
-};
+      // Graceful shutdown
+      process.on("SIGINT", async () => {
+        console.log("Shutting down Redis connection...");
+        await RedisSingleton.instance.quit();
+        process.exit(0);
+      });
 
-export const safeRedisOperation = async <T>(
-  operation: () => Promise<T>,
-  fallback?: T,
-): Promise<T> => {
-  try {
-    return await operation();
-  } catch (error) {
-    console.error("Redis operation failed:", error);
-    if (fallback !== undefined) {
-      return fallback;
+      process.on("SIGTERM", async () => {
+        console.log("Shutting down Redis connection...");
+        await RedisSingleton.instance.quit();
+        process.exit(0);
+      });
     }
-    throw error;
+    return RedisSingleton.instance;
   }
-};
+
+  public static isConnected(): boolean {
+    return RedisSingleton.instance?.status === "ready";
+  }
+
+  public static async safeOperation<T>(
+    operation: () => Promise<T>,
+    fallback?: T
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      console.error("Redis operation failed:", error);
+      if (fallback !== undefined) {
+        return fallback;
+      }
+      throw error;
+    }
+  }
+}
+
+export default RedisSingleton;

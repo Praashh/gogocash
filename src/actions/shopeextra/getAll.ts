@@ -7,9 +7,10 @@ import {
   TProductDataResponse,
   TProductData,
 } from "@/../zod/involve-asia";
-import { redis } from "@/lib/redis";
+import {RedisSingleton} from "@/lib/redis";
 import { logger } from "@/lib/logger";
 
+const redis = RedisSingleton.getInstance();
 export interface GetAllDataResponse {
   status: "success" | "failed";
   message: string;
