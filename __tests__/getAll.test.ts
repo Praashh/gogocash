@@ -1,12 +1,17 @@
 import { describe, it, expect, beforeEach, vi, afterAll } from "vitest";
 import { getAllData } from "../src/actions/shopeextra/getAll";
 import { SecureHttpClient } from "@/lib/http-client";
-import { redis } from "@/lib/redis";
 import { logger } from "@/lib/logger";
 import { productDataResponseSchema } from "@/../zod/involve-asia";
 
+// Create mock Redis functions using hoisted to avoid reference errors
+const { mockRedisSet, mockRedisGet } = vi.hoisted(() => ({
+  mockRedisSet: vi.fn(),
+  mockRedisGet: vi.fn(),
+}));
+
+// Mock dependencies
 vi.mock("@/lib/http-client");
-vi.mock("@/lib/redis");
 vi.mock("@/lib/logger");
 vi.mock("@/lib/config", () => ({
   API_CONFIG: {
@@ -30,8 +35,17 @@ vi.mock("@/lib/config", () => ({
   },
 }));
 
+// Mock RedisSingleton using the hoisted functions
+vi.mock("@/lib/redis", () => ({
+  RedisSingleton: {
+    getInstance: vi.fn(() => ({
+      set: mockRedisSet,
+      get: mockRedisGet,
+    })),
+  },
+}));
+
 const mockedSecureHttpClient = vi.mocked(SecureHttpClient);
-const mockedRedis = vi.mocked(redis);
 const mockedLogger = vi.mocked(logger);
 
 const originalEnv = process.env;
@@ -54,6 +68,10 @@ describe("getAllData", () => {
       post: vi.fn(),
     };
     mockedSecureHttpClient.mockImplementation(() => mockClient);
+    
+    // Reset Redis mocks
+    mockRedisSet.mockReset();
+    mockRedisGet.mockReset();
   });
 
   afterAll(() => {
@@ -93,7 +111,7 @@ describe("getAllData", () => {
       data: mockApiResponse,
     });
 
-    mockedRedis.set.mockResolvedValueOnce("OK");
+    mockRedisSet.mockResolvedValueOnce("OK");
 
     const result = await getAllData(1, "test-token");
 
@@ -116,7 +134,7 @@ describe("getAllData", () => {
       data: mockApiResponse.data.data,
     });
 
-    expect(mockedRedis.set).toHaveBeenCalledWith(
+    expect(mockRedisSet).toHaveBeenCalledWith(
       "products:page:1",
       JSON.stringify(mockApiResponse.data.data),
       "EX",
@@ -204,7 +222,7 @@ describe("getAllData", () => {
       data: validApiResponse,
     });
 
-    mockedRedis.set.mockResolvedValueOnce("OK");
+    mockRedisSet.mockResolvedValueOnce("OK");
 
     const result = await getAllData(1, "test-token");
 
@@ -234,7 +252,7 @@ describe("getAllData", () => {
       data: emptyDataResponse,
     });
 
-    mockedRedis.set.mockResolvedValueOnce("OK");
+    mockRedisSet.mockResolvedValueOnce("OK");
 
     const result = await getAllData(1, "test-token");
 
