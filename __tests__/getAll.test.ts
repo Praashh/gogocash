@@ -68,7 +68,7 @@ describe("getAllData", () => {
       post: vi.fn(),
     };
     mockedSecureHttpClient.mockImplementation(() => mockClient);
-    
+
     // Reset Redis mocks
     mockRedisSet.mockReset();
     mockRedisGet.mockReset();

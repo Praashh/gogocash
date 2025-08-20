@@ -16,7 +16,7 @@ vi.mock("@/lib/redis", () => {
     get: vi.fn(),
     set: vi.fn(),
   };
-  
+
   return {
     redis: mockRedisInstance,
     RedisSingleton: {
