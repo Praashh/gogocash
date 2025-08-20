@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {RedisSingleton} from "@/lib/redis";
+import { RedisSingleton } from "@/lib/redis";
 import { getAllData } from "@/actions/shopeextra/getAll";
 import { getAuthToken } from "@/actions/shopeextra/getToken";
 import { getServerSession } from "next-auth";

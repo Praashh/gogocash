@@ -7,7 +7,7 @@ import {
   TProductDataResponse,
   TProductData,
 } from "@/../zod/involve-asia";
-import {RedisSingleton} from "@/lib/redis";
+import { RedisSingleton } from "@/lib/redis";
 import { logger } from "@/lib/logger";
 
 const redis = RedisSingleton.getInstance();

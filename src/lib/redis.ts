@@ -56,7 +56,7 @@ export class RedisSingleton {
 
   public static async safeOperation<T>(
     operation: () => Promise<T>,
-    fallback?: T
+    fallback?: T,
   ): Promise<T> {
     try {
       return await operation();
