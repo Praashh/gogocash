@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
+import { RedisSingleton } from "@/lib/redis";
 import { getAllData } from "@/actions/shopeextra/getAll";
 import { getAuthToken } from "@/actions/shopeextra/getToken";
 import { getServerSession } from "next-auth";
+
+const redis = RedisSingleton.getInstance();
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession();

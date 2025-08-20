@@ -10,11 +10,17 @@ vi.mock("next/server", () => {
   };
 });
 
+// Fix the Redis mock to include RedisSingleton
 vi.mock("@/lib/redis", () => {
+  const mockRedisInstance = {
+    get: vi.fn(),
+    set: vi.fn(),
+  };
+
   return {
-    redis: {
-      get: vi.fn(),
-      set: vi.fn(),
+    redis: mockRedisInstance,
+    RedisSingleton: {
+      getInstance: vi.fn(() => mockRedisInstance),
     },
   };
 });
