@@ -30,7 +30,8 @@ jobs:
           echo "SHOPEEXTRA_API_KEY=dummy_key" >> $GITHUB_ENV
           echo "SHOPEEXTRA_API_SECRET=dummy_secret" >> $GITHUB_ENV
           echo "NODE_ENV=test" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_APP_URL="http://localhost:3000" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> $GITHUB_ENV
+
 
       - name: Run ESLint
         run: npm run lint
