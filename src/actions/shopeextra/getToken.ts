@@ -3,6 +3,8 @@
 import axios from "axios";
 
 const URL = process.env.NEXT_PUBLIC_SHOPEEXTRA_PREFIX + "/authenticate";
+const GENERAL = process.env.SHOPEEXTRA_API_KEY;
+const SECRET = process.env.SHOPEEXTRA_API_SECRET;
 
 export async function getAuthToken(): Promise<{
   success: boolean;
@@ -11,8 +13,8 @@ export async function getAuthToken(): Promise<{
   console.log("FETCHING TOKEN FROM THE API");
   try {
     const response = await axios.post(URL, {
-      key: "general",
-      secret: "o1pW16U54vPeK91Yut/SZHRVpuMqo8L5VTRQxjtD7iM=",
+      key: GENERAL,
+      secret: SECRET,
     });
 
     if (!response.data) {
