@@ -1,6 +1,7 @@
 "use server";
 
 import axios from "axios";
+import { logger } from "@/lib/logger";
 
 const URL = process.env.NEXT_PUBLIC_SHOPEEXTRA_PREFIX + "/authenticate";
 const GENERAL = process.env.SHOPEEXTRA_API_KEY;
@@ -10,7 +11,6 @@ export async function getAuthToken(): Promise<{
   success: boolean;
   token: string | null;
 }> {
-  console.log("FETCHING TOKEN FROM THE API");
   try {
     const response = await axios.post(URL, {
       key: GENERAL,
@@ -29,7 +29,9 @@ export async function getAuthToken(): Promise<{
       };
     }
   } catch (error) {
-    console.log(`Error while getting token: ${error}`);
+    logger.error(`TOKEN_FETCHING_ERROR`, {
+      error: error,
+    });
     return {
       success: false,
       token: null,
