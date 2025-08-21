@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SessionProviders } from "../../providers";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
+import { seoConfig } from "../../config/seo";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -17,10 +17,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-export const metadata: Metadata = {
-  title: "Go Go Cash",
-  description: "Go Go Cash",
-};
+export const metadata = seoConfig;
 
 export default function RootLayout({
   children,

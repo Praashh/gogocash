@@ -32,15 +32,17 @@ export default function Header() {
 
   return (
     <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-      <div className="flex items-center space-x-2 sm:space-x-3">
-        <div
-          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-teal-400 bg-transparent flex items-center justify-center text-teal-400 font-bold text-sm sm:text-base"
-          aria-label="GoGoCash logo"
-        >
-          G
+      <Link href={"/"}>
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div
+            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-teal-400 bg-transparent flex items-center justify-center text-teal-400 font-bold text-sm sm:text-base"
+            aria-label="GoGoCash logo"
+          >
+            G
+          </div>
+          <span className="text-lg sm:text-xl font-semibold">GoGoCash</span>
         </div>
-        <span className="text-lg sm:text-xl font-semibold">GoGoCash</span>
-      </div>
+      </Link>
       <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
         {navLinks.map((link) => (
           <Link
@@ -87,10 +89,12 @@ export default function Header() {
         >
           <SheetHeader className="text-left">
             <SheetTitle className="text-white flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full border-2 border-teal-400 bg-transparent flex items-center justify-center text-teal-400 font-bold text-sm">
-                G
-              </div>
-              <span className="text-lg font-semibold">GoGoCash</span>
+              <Link href={"/"}>
+                <div className="w-6 h-6 rounded-full border-2 border-teal-400 bg-transparent flex items-center justify-center text-teal-400 font-bold text-sm">
+                  G
+                </div>
+                <span className="text-lg font-semibold">GoGoCash</span>
+              </Link>
             </SheetTitle>
           </SheetHeader>
 
