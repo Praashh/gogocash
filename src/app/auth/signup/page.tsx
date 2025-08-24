@@ -64,17 +64,34 @@ export default function SignUp() {
       const result = await response.data;
       console.log(result);
 
-      if (response.status !== 201) {
-        throw new Error(result.error || "Registration failed");
-      }
-
       toast.success("Registration successful");
       router.push(
         "/auth/signin?message=Registration successful! Please sign in.",
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Registration failed:", error);
-      setError(error instanceof Error ? error.message : "Registration failed");
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: {
+            data?: { error?: string; details?: Array<{ message: string }> };
+          };
+        };
+        if (axiosError.response?.data?.error) {
+          setError(axiosError.response.data.error);
+        } else if (axiosError.response?.data?.details) {
+          const validationErrors = axiosError.response.data.details
+            .map((detail) => detail.message)
+            .join(", ");
+          setError(`Validation failed: ${validationErrors}`);
+        } else {
+          setError("Registration failed. Please try again.");
+        }
+      } else if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

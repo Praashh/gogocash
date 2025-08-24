@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  NEXT_PUBLIC_SHOPEEXTRA_PREFIX: z.string().url(),
+  NEXT_PUBLIC_SHOPEEXTRA_PREFIX: z.string().url().optional(),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z
     .string()
@@ -10,8 +10,8 @@ const envSchema = z.object({
     .default(6379),
   REDIS_PASSWORD: z.string().optional(),
   REDIS_USER: z.string().optional(),
-  SHOPEEXTRA_API_KEY: z.string().min(1),
-  SHOPEEXTRA_API_SECRET: z.string().min(1),
+  SHOPEEXTRA_API_KEY: z.string().min(1).optional(),
+  SHOPEEXTRA_API_SECRET: z.string().min(1).optional(),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
@@ -26,14 +26,27 @@ if (!envValidation.success) {
 
 export const config = envValidation.data;
 
+// Validate ShopeeExtra config at runtime, not build time
+export const validateShopeeExtraConfig = () => {
+  if (!config.NEXT_PUBLIC_SHOPEEXTRA_PREFIX) {
+    throw new Error("NEXT_PUBLIC_SHOPEEXTRA_PREFIX is required");
+  }
+  if (!config.SHOPEEXTRA_API_KEY) {
+    throw new Error("SHOPEEXTRA_API_KEY is required");
+  }
+  if (!config.SHOPEEXTRA_API_SECRET) {
+    throw new Error("SHOPEEXTRA_API_SECRET is required");
+  }
+};
+
 export const API_CONFIG = {
   SHOPEEXTRA: {
-    BASE_URL: config.NEXT_PUBLIC_SHOPEEXTRA_PREFIX,
+    BASE_URL: config.NEXT_PUBLIC_SHOPEEXTRA_PREFIX || "",
     AUTH_ENDPOINT: "/authenticate",
     PRODUCTS_ENDPOINT: "/shopeextra/all",
     CREDENTIALS: {
-      key: config.SHOPEEXTRA_API_KEY,
-      secret: config.SHOPEEXTRA_API_SECRET,
+      key: config.SHOPEEXTRA_API_KEY || "",
+      secret: config.SHOPEEXTRA_API_SECRET || "",
     },
   },
 } as const;
