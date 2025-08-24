@@ -27,7 +27,7 @@ Before running the application, you'll need to set up several services and envir
 For more in-depth information on environment variables, please refer to the [Environment Variables](#environment-variables) section.
 
 1. **Setup Local**
-   - Make sure you have [Docker](https://docs.docker.com/get-docker/), [NodeJS](https://nodejs.org/en/download/), and [bun](https://bun.sh/docs/installation) installed.
+   - Make sure you have [Docker](https://docs.docker.com/get-docker/), [NodeJS](https://nodejs.org/en/download/) installed.
    - Open codebase as a container in [VSCode](https://code.visualstudio.com/) or your favorite VSCode fork.
    - Run the following commands in order to populate your dependencies and setup docker
 
@@ -42,7 +42,7 @@ For more in-depth information on environment variables, please refer to the [Env
      ```
 
 2. **Next Auth Setup**
-   - Open the `.env` file and change the AUTH_SECRET to string given below.
+   - Open the `.env` file and change the NEXTAUTH_SECRET to string given below.
 
      ```env
      NEXTAUTH_SECRET= '<YOUR_SECRET>'
@@ -55,17 +55,7 @@ Copy `.env.example` located in `.env` in the configure the following variables:
 ```env
 # Auth
 NEXTAUTH_URL=
-NEXTAUTH_SECRET=     # Required: Secret key for authentication
-
-# Database ( Required )
-DATABASE_URL=
-DIRECT_URL=
-
-# Redis ( Required )
-REDIS_PASSWORD=
-REDIS_PORT=
-REDIS_USER=
-REDIS_HOST=
+NEXTAUTH_SECRET=     # Required: Secret key for authentication (You can generate a random string using `openssl rand -base64 32`)
 
 # Involve Asia ( Required )
 NEXT_PUBLIC_SHOPEEXTRA_PREFIX=
@@ -73,7 +63,18 @@ SHOPEEXTRA_API_KEY=
 SHOPEEXTRA_API_SECRET=
 ```
 
-Migration the database by running `npm run db:migrate` and generate prisma client `npm run db:generate`.
+4. Run the following commands to setup the database
+
+```bash
+docker-compose up -d
+```
+
+5. Run the following commands to setup the database
+
+```bash
+npm run db:migrate
+npm run db:generate
+```
 
 ### Running Locally
 
